@@ -41,7 +41,7 @@ const labelSumInterest = document.querySelector('.summary__value--interest');
 const labelTimer = document.querySelector('.timer');
 
 const containerApp = document.querySelector('.app');
-const containerMovements = document.querySelectzor('.movements');
+const containerMovements = document.querySelector('.movements');
 
 const btnLogin = document.querySelector('.login__btn');
 const btnTransfer = document.querySelector('.form__btn--transfer');
@@ -56,3 +56,25 @@ const inputTransferAmount = document.querySelector('.form__input--amount');
 const inputLoanAmount = document.querySelector('.form__input--loan-amount');
 const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
+
+const displayMovements = function (movements) {
+  containerMovements.innerHTML = '';
+
+  // loop movements
+  movements.forEach(function (mov, i) {
+    const type = mov > 0 ? 'deposit' : 'withdrawal';
+    const html = `
+     <div class="movements__row">
+       <div class="movements__type movements__type--${type}">${
+      i + 1
+    } deposit</div>
+       <div class="movements__value">${mov}€</div>
+     </div>
+   `;
+
+    containerMovements.insertAdjacentHTML('afterbegin', html);
+  });
+};
+
+// call the function
+displayMovements(account1.movements);
