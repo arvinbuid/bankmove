@@ -2,7 +2,7 @@
 
 // Data
 const account1 = {
-  owner: 'John Doe',
+  owner: 'Steven Thomas Williams',
   movements: [200, 450, -400, 3000, -650, -130, 70, 1300],
   interestRate: 1.2, // %
   pin: 1111,
@@ -61,8 +61,9 @@ const displayMovements = function (movements) {
   containerMovements.innerHTML = '';
 
   // loop movements
-  movements.forEach(function (mov, i) {
+  movements.map((mov, i) => {
     const type = mov > 0 ? 'deposit' : 'withdrawal';
+
     const html = `
      <div class="movements__row">
        <div class="movements__type movements__type--${type}">${
@@ -78,3 +79,49 @@ const displayMovements = function (movements) {
 
 // call the function
 displayMovements(account1.movements);
+
+const createUserNames = function (accs) {
+  // forEach produce side effect
+  accs.forEach(function (acc, i) {
+    acc.username = acc.owner
+      .toLowerCase()
+      .split(' ')
+      .map(user => user[0])
+      .join('');
+  });
+};
+
+createUserNames(accounts);
+console.log(accounts);
+
+// Exercise 1
+
+// const dogsJulia1 = [3, 5, 2, 12, 7];
+// const dogsKate1 = [4, 1, 15, 8, 3];
+
+// const dogsJulia2 = [9, 16, 6, 8, 3];
+// const dogsKate2 = [10, 5, 6, 1, 4];
+
+// const checkDogs = function (dogsJulia, dogsKate) {
+//   let copy = dogsJulia.slice();
+//   copy.splice(0, 1); // get the first number in dogsJulia array
+//   copy.splice(-2); // get the last two number in dogsJulia array
+//   const correctedDogsJulia = copy.concat(dogsKate);
+
+//   correctedDogsJulia.forEach(function (dog, i) {
+//     if (dog >= 3) {
+//       console.log(`Dog number ${i + 1} is an adult, and is ${dog} years old.`);
+//     } else {
+//       console.log(`Dog number ${i + 1} is still a puppy.🐶`);
+//     }
+//   });
+// };
+
+// checkDogs(dogsJulia2, dogsKate2);
+
+// const euroToUSD = 1.1;
+
+// const movementsToUSD = account1.movements.map(mov => mov * euroToUSD);
+
+// console.log(account1.movements);
+// console.log(movementsToUSD);
