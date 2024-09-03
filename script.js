@@ -68,8 +68,8 @@ const displayMovements = function (movements) {
      <div class="movements__row">
        <div class="movements__type movements__type--${type}">${
       i + 1
-    } deposit</div>
-       <div class="movements__value">${mov}€</div>
+    } ${type}</div>
+       <div class="movements__value">${mov}</div>
      </div>
    `;
 
@@ -77,8 +77,38 @@ const displayMovements = function (movements) {
   });
 };
 
-// call the function
+const calculateDisplayBalance = function (movements) {
+  const balance = movements.reduce((acc, cur) => acc + cur);
+  labelBalance.textContent = `${balance} €`;
+};
+
+const calculateDisplaySummary = function (movements) {
+  const income = movements
+    .filter(mov => mov > 0)
+    .reduce((acc, mov) => acc + mov, 0);
+  labelSumIn.textContent = `${income}€`;
+
+  const out = movements
+    .filter(mov => mov < 0)
+    .reduce((acc, mov) => acc + mov, 0);
+  labelSumOut.textContent = `${Math.abs(out)}€`;
+
+  const interest = movements
+    .filter(mov => mov > 0)
+    .map(deposit => (deposit * 1.2) / 100)
+    .filter(interest => interest > 1)
+    .reduce((acc, interest) => acc + interest, 0);
+  labelSumInterest.textContent = `${interest}€`;
+};
+
+// display deposit & withdrawals
 displayMovements(account1.movements);
+
+// display total balance
+calculateDisplayBalance(account1.movements);
+
+// display summary of deposit, withdraw & interest
+calculateDisplaySummary(account1.movements);
 
 const createUserNames = function (accs) {
   // forEach produce side effect
@@ -92,7 +122,6 @@ const createUserNames = function (accs) {
 };
 
 createUserNames(accounts);
-console.log(accounts);
 
 // Exercise 1
 
@@ -125,3 +154,48 @@ console.log(accounts);
 
 // console.log(account1.movements);
 // console.log(movementsToUSD);
+
+const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
+
+// Reduce
+
+// Calculate maximum value
+
+// const max = movements.reduce((acc, cur) => (acc > cur ? acc : cur));
+// console.log(max);
+
+// Exercise 2
+
+// const calcAverageHumanAge = function (ages) {
+//   const humanAges = ages.map(age => (age <= 2 ? 2 * age : 16 + age * 4));
+
+//   // console.log(humanAges)
+//   const adults = humanAges.filter(age => age >= 18);
+
+//   const average = adults.reduce(
+//     (acc, age, i, arr) => acc + age / arr.length,
+//     0
+//   );
+
+//   return average;
+// };
+
+// console.log('DATA #1: ' + calcAverageHumanAge([5, 2, 4, 1, 15, 8, 3]));
+// console.log('DATA #2 ' + calcAverageHumanAge([16, 6, 10, 5, 6, 1, 4]));
+
+// const euroToUSD = 1.1;
+// const totalDepositsUSD = movements
+//   .filter(mov => mov > 0)
+//   .map(mov => mov * euroToUSD)
+//   .reduce((acc, mov) => acc + mov, 0);
+
+// Exercise 3
+
+// const calcAverageHumanAge = ages =>
+//   ages
+//     .map(age => (age <= 2 ? 2 * age : 16 + age * 4))
+//     .filter(age => age >= 18)
+//     .reduce((acc, age, i, arr) => acc + age / arr.length, 0);
+
+// console.log(calcAverageHumanAge([5, 2, 4, 1, 15, 8, 3]));
+// console.log(calcAverageHumanAge([16, 6, 10, 5, 6, 1, 4]));
