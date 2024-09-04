@@ -116,20 +116,6 @@ const createUserNames = function (accs) {
   });
 };
 
-// createUserNames(accounts);
-createUserNames(accounts);
-
-const updateUI = function (acc) {
-  // display movements
-  displayMovements(acc.movements);
-
-  // display balance
-  calculateDisplayBalance(acc);
-
-  // display summary
-  calculateDisplaySummary(acc);
-};
-
 // Event listeners
 let currentAccount;
 let pin;
@@ -159,6 +145,20 @@ btnLogin.addEventListener('click', function (e) {
   }
 });
 
+// createUserNames(accounts);
+createUserNames(accounts);
+
+const updateUI = function (acc) {
+  // display movements
+  displayMovements(acc.movements);
+
+  // display balance
+  calculateDisplayBalance(acc);
+
+  // display summary
+  calculateDisplaySummary(acc);
+};
+
 // TRANSFER
 btnTransfer.addEventListener('click', function (e) {
   e.preventDefault();
@@ -183,11 +183,35 @@ btnTransfer.addEventListener('click', function (e) {
     receiverAcc.movements.push(amount);
   }
 
+  // clear input fields
+  inputTransferTo.value = inputTransferAmount.value = '';
+
   // update the UI
   updateUI(currentAccount);
 });
 
 // CLOSE ACCOUNT
+btnClose.addEventListener('click', function (e) {
+  e.preventDefault();
+
+  if (
+    inputCloseUsername.value === currentAccount.username &&
+    Number(inputClosePin.value) === currentAccount.pin
+  ) {
+    // delete account
+    const index = accounts.findIndex(
+      acc => acc.username === currentAccount.username
+    );
+
+    accounts.splice(index, 1);
+
+    // remove the UI
+    containerApp.style.opacity = 0;
+  }
+
+  // clear input fields
+  inputCloseUsername.value = inputClosePin.value = '';
+});
 
 // Exercise 1
 
