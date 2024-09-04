@@ -145,7 +145,7 @@ btnLogin.addEventListener('click', function (e) {
   }
 });
 
-// createUserNames(accounts);
+// create a user;
 createUserNames(accounts);
 
 const updateUI = function (acc) {
@@ -188,6 +188,25 @@ btnTransfer.addEventListener('click', function (e) {
 
   // update the UI
   updateUI(currentAccount);
+});
+
+// REQUEST LOAN
+btnLoan.addEventListener('click', function (e) {
+  e.preventDefault();
+
+  const amount = Number(inputLoanAmount.value);
+
+  if (amount > 0 && currentAccount.movements.some(mov => mov > amount * 0.1)) {
+    currentAccount.movements.push(amount);
+  } else {
+    console.log('requested loan is too big!');
+  }
+
+  // Update the UI
+  updateUI(currentAccount);
+
+  // clear input field
+  inputLoanAmount.value = '';
 });
 
 // CLOSE ACCOUNT
@@ -248,7 +267,6 @@ btnClose.addEventListener('click', function (e) {
 const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
 
 // Reduce
-
 // Calculate maximum value
 
 // const max = movements.reduce((acc, cur) => (acc > cur ? acc : cur));
@@ -294,3 +312,23 @@ const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
 // const user = accounts.find(acc => acc.owner === 'Jane Doe');
 
 // console.log(user);
+
+// Some & every
+// console.log(movements);
+
+// // checks for equality
+// console.log(movements.includes(-130));
+
+// // Some: checks for condition
+// const anyDeposits = movements.some(mov => mov > 1500);
+// console.log(anyDeposits);
+
+// // Every
+// console.log(movements.every(mov => mov > 0));
+// console.log(account4.movements.every(mov => mov > 0));
+
+// const deposit = mov => mov > 0;
+// console.log(movements.some(deposit));
+// console.log(movements.every(deposit));
+
+// flat and flatMap
