@@ -70,23 +70,34 @@ const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
 // Display deposit & withdrawals
-const displayMovements = function (movements, sort = false) {
+const displayMovements = function (acc, sort = false) {
   containerMovements.innerHTML = '';
 
   // sort movements if true
   const movsSort = sort
     ? currentAccount.movements.slice().sort((a, b) => a - b)
-    : movements;
+    : acc.movements;
 
   // loop movements
   movsSort.map((mov, i) => {
     const type = mov > 0 ? 'deposit' : 'withdrawal';
+
+    // display date
+    const date = new Date(acc.movementsDates[i]);
+
+    const year = date.getFullYear();
+    const month = `${date.getMonth() + 1}`.padStart(2, 0);
+    const dateMonth = `${date.getDate()}`.padStart(2, 0);
+
+    const displayDate =
+      (labelDate.textContent = `${year}/${month}/${dateMonth}`);
 
     const html = `
      <div class="movements__row">
        <div class="movements__type movements__type--${type}">${
       i + 1
     } ${type}</div>
+       <div class="movements__date">${displayDate}</div>
        <div class="movements__value">${mov.toFixed(2)}</div>
      </div>
    `;
@@ -134,9 +145,35 @@ const createUserNames = function (accs) {
   });
 };
 
+const updateUI = function (acc) {
+  // display movements
+  displayMovements(acc);
+
+  // display balance
+  calculateDisplayBalance(acc);
+
+  // display summary
+  calculateDisplaySummary(acc);
+};
+
 // Event listeners
 let currentAccount;
-let pin;
+
+// FAKE ALWAYS LOGGED IN - TESTING PURPOSES
+currentAccount = account1;
+updateUI(currentAccount);
+containerApp.style.opacity = 100;
+
+// DISPLAY CURRENT DATE - yyyy-mm-dd
+const now = new Date();
+
+const year = now.getFullYear();
+const month = `${now.getMonth() + 1}`.padStart(2, 0);
+const date = `${now.getDate()}`.padStart(2, 0);
+const hour = now.getHours();
+const minutes = `${now.getMinutes()}`.padStart(2, 0);
+
+labelDate.textContent = `${year}/${month}/${date}, ${hour}:${minutes}`;
 
 // LOGIN
 btnLogin.addEventListener('click', function (e) {
@@ -155,27 +192,27 @@ btnLogin.addEventListener('click', function (e) {
     }`;
     containerApp.style.opacity = 100;
 
-    // clear input fields
-    inputLoginUsername.value = inputLoginPin.value = '';
-
     // update the UI
     updateUI(currentAccount);
+
+    // create current date
+    const now = new Date();
+
+    const year = now.getFullYear();
+    const month = `${now.getMonth() + 1}`.padStart(2, 0);
+    const date = `${now.getDate()}`.padStart(2, 0);
+    const hour = now.getHours();
+    const minutes = `${now.getMinutes()}`.padStart(2, 0);
+
+    labelDate.textContent = `${year}/${month}/${date}, ${hour}:${minutes}`;
+
+    // clear input fields
+    inputLoginUsername.value = inputLoginPin.value = '';
   }
 });
 
 // create a user;
 createUserNames(accounts);
-
-const updateUI = function (acc) {
-  // display movements
-  displayMovements(acc.movements);
-
-  // display balance
-  calculateDisplayBalance(acc);
-
-  // display summary
-  calculateDisplaySummary(acc);
-};
 
 // TRANSFER
 btnTransfer.addEventListener('click', function (e) {
@@ -201,11 +238,15 @@ btnTransfer.addEventListener('click', function (e) {
     receiverAcc.movements.push(amount);
   }
 
-  // clear input fields
-  inputTransferTo.value = inputTransferAmount.value = '';
+  // add date
+  currentAccount.movementsDates.push(new Date().toISOString());
+  receiverAcc.movementsDates.push(new Date().toISOString());
 
   // update the UI
   updateUI(currentAccount);
+
+  // clear input fields
+  inputTransferTo.value = inputTransferAmount.value = '';
 });
 
 // REQUEST LOAN
@@ -219,6 +260,9 @@ btnLoan.addEventListener('click', function (e) {
   } else {
     console.log('requested loan is too big!');
   }
+
+  // add date
+  currentAccount.movementsDates.push(new Date().toISOString());
 
   // Update the UI
   updateUI(currentAccount);
@@ -254,7 +298,7 @@ btnClose.addEventListener('click', function (e) {
 let sorted = false;
 btnSort.addEventListener('click', function (e) {
   e.preventDefault();
-  displayMovements(currentAccount.movements, !sorted);
+  displayMovements(currentAccount, !sorted);
   sorted = !sorted;
 });
 
@@ -490,11 +534,11 @@ btnSort.addEventListener('click', function (e) {
 
 // console.log(0.1 + 0.2 === 0.3);
 
-// // conversion
+// // Conversion
 // console.log(Number('23'));
 // console.log(+'23');
 
-// // parsing
+// // Parsing
 // console.log(Number.parseInt('22px'));
 // console.log(Number.parseFloat('22.5px'));
 
@@ -527,3 +571,84 @@ btnSort.addEventListener('click', function (e) {
 // console.log(Math.floor(-23.8));
 // console.log((2.8).toFixed(1)); // returns string
 // console.log(+(2.8).toFixed(1));
+
+// Remainder
+// console.log(5 % 2); // 2 * 2 + 1
+// console.log(19 % 5); // 5 * 2 + 4
+// console.log(6 % 2); // 6 * 2 + 0
+
+// const isEven = n => n % 2 === 0;
+// console.log(isEven(4));
+// console.log(isEven(9));
+// console.log(isEven(22));
+
+// labelBalance.addEventListener('click', function () {
+//   [...document.querySelectorAll('.movements__row')].forEach(function (row, i) {
+//     // 0, 2, 4, 6...
+//     if (i % 2 === 0) row.style.backgroundColor = '#ffecd8';
+//     // 0, 3, 6, 9...
+//     if (i % 3 === 0) row.style.backgroundColor = '#b5e2ff';
+//     // useful for selecting nth child
+//   });
+// });
+
+// Numeric Separators = _
+// const diameter = 287_460_000_000;
+// console.log(diameter);
+
+// const price = 345_99;
+// console.log(price);
+
+// console.log(Number('389_000')); // not gonna work (NaN)
+
+// BigInt
+// console.log(2 ** 53 - 1); // safe maximum integer
+// console.log(Number.MAX_SAFE_INTEGER); // same as the code above
+
+// BigInt - ES2020
+// console.log(8934340209039232302930090043486404590494n);
+// console.log(BigInt(8934340209039232302930090043486404590494));
+
+// // operations
+// console.log(40000000n + 6000000n);
+// console.log(483984930437473434n + 23400000n);
+
+// // exceptions
+// console.log(20n > 18);
+// console.log(20n === 20);
+// console.log(20n == '20');
+
+// console.log(2000n + 20); // not allowed
+
+// Dates
+// const now = new Date();
+// console.log(now);
+
+// // console.log(new Date('Sep 05 2024 19:30:34'));
+// console.log(new Date('April 22 2001'));
+
+// console.log(new Date(2029, 11, 1, 22, 0, 0));
+// console.log(new Date(2029, 11, 32, 24, 0, 0)); // js automatically correct the date
+
+// console.log(new Date(0)); // UNIX time starts
+// console.log(new Date(3 * 24 * 60 * 60 * 1000)); // 3 days after UNIX time starts
+
+// Working with Dates
+// const future = new Date(2029, 11, 1, 22, 0, 0);
+// console.log(future);
+// console.log('Year:', future.getFullYear());
+// console.log('Month:', future.getMonth());
+// console.log('Day of the Month:', future.getDate());
+// console.log('Day of the Week:', future.getDay());
+// console.log('Hours:', future.getHours());
+// console.log('Seconds:', future.getSeconds());
+// console.log('Milliseconds:', future.getMilliseconds());
+// console.log('ISO format:', future.toISOString());
+// console.log('Milliseconds passed since 01-01-1970:', future.getTime());
+
+// console.log(new Date(2553516000000));
+
+// console.log(Date.now()); // timestamp 01-01-1970 to current date
+
+// future.setFullYear(2050);
+// console.log(future);
