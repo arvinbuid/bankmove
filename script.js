@@ -1,6 +1,6 @@
 'use strict';
 
-// Data
+// DATAS
 const account1 = {
   owner: 'Mary Jane Watson',
   movements: [200, 455.23, -306.5, 25000, -642.21, -133.9, 79.97, 1300],
@@ -43,7 +43,7 @@ const account2 = {
 
 const accounts = [account1, account2];
 
-// Elements
+// ELEMENTS
 const labelWelcome = document.querySelector('.welcome');
 const labelDate = document.querySelector('.date');
 const labelBalance = document.querySelector('.balance__value');
@@ -70,7 +70,6 @@ const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
 // FUNCTIONS
-
 const formatMovementDate = function (date, locale) {
   const calcDaysPassed = (date1, date2) =>
     Math.round(Math.abs(date2 - date1) / (1000 * 60 * 60 * 24));
@@ -89,6 +88,7 @@ const formatMovementDate = function (date, locale) {
   return new Intl.DateTimeFormat(locale).format(date);
 };
 
+/////////////////////////////////////////////
 // REUSABLE INTERNATIONALIZATION FOR CURRENCY
 const formatCurrency = function (value, locale, currency) {
   return new Intl.NumberFormat(locale, {
@@ -96,6 +96,9 @@ const formatCurrency = function (value, locale, currency) {
     currency,
   }).format(value);
 };
+
+////////////////////////////////////////////
+////////////////////////////////////////////
 
 // Display deposit & withdrawals
 const displayMovements = function (acc, sort = false) {
@@ -110,11 +113,11 @@ const displayMovements = function (acc, sort = false) {
   movsSort.map((mov, i) => {
     const type = mov > 0 ? 'deposit' : 'withdrawal';
 
-    // internationalization date
+    // date internationalization
     const date = new Date(acc.movementsDates[i]);
     const displayDate = formatMovementDate(date, acc.locale);
 
-    // internationalization currency
+    // currency internationalization
     const displayMovementCurrency = formatCurrency(
       mov,
       acc.locale,
@@ -174,7 +177,7 @@ const calculateDisplaySummary = function (acc) {
   labelSumInterest.textContent = interestCurrency;
 };
 
-// Format username
+// Create every first letter lowercase username e.g Peter Parker (pp) into accounts array
 const createUserNames = function (accs) {
   // forEach produce side effect
   accs.forEach(function (acc, i) {
@@ -197,19 +200,43 @@ const updateUI = function (acc) {
   calculateDisplaySummary(acc);
 };
 
-// Event listeners
-let currentAccount;
+// Logout timer
+const startLogOutTimer = function () {
+  let time = 600;
+
+  const tick = function () {
+    const min = String(Math.trunc(time / 60)).padStart(2, 0);
+    const sec = String(Math.trunc(time % 60)).padStart(2, 0);
+
+    labelTimer.textContent = `${min}:${sec}`;
+
+    if (time === 0) {
+      clearInterval(timer);
+      labelWelcome.textContent = 'Log in to get started';
+      containerApp.style.opacity = 0;
+    }
+
+    time--;
+  };
+
+  tick(); // immediately call this function
+  const timer = setInterval(tick, 1000);
+  return timer;
+};
+
+// EVENT LISTENERS
+let currentAccount, timer;
 
 // FAKE ALWAYS LOGGED IN - TESTING PURPOSES
-currentAccount = account1;
-updateUI(currentAccount);
-containerApp.style.opacity = 100;
+// currentAccount = account1;
+// updateUI(currentAccount);
+// containerApp.style.opacity = 100;
 
-// LOGIN
+// Login
 btnLogin.addEventListener('click', function (e) {
   e.preventDefault();
 
-  // find if current acc exists
+  // find if acc exists from accounts
   currentAccount = accounts.find(
     acc => acc.username === inputLoginUsername.value
   );
@@ -222,9 +249,6 @@ btnLogin.addEventListener('click', function (e) {
     }`;
     containerApp.style.opacity = 100;
 
-    // update the UI
-    updateUI(currentAccount);
-
     // create current date - internationalization
     const now = new Date();
     let options = {
@@ -236,20 +260,26 @@ btnLogin.addEventListener('click', function (e) {
     };
 
     const locale = navigator.language;
-
     labelDate.textContent = new Intl.DateTimeFormat(locale, options).format(
       now
     );
+
+    // logout timer
+    if (timer) clearInterval(timer); // clear timer if exists
+    timer = startLogOutTimer();
+
+    // update the UI
+    updateUI(currentAccount);
 
     // clear input fields
     inputLoginUsername.value = inputLoginPin.value = '';
   }
 });
 
-// create a user;
+// Create new first letter lowercase username;
 createUserNames(accounts);
 
-// TRANSFER
+// Transfer balance
 btnTransfer.addEventListener('click', function (e) {
   e.preventDefault();
 
@@ -258,9 +288,7 @@ btnTransfer.addEventListener('click', function (e) {
     acc => acc.username === inputTransferTo.value
   );
 
-  console.log(amount, receiverAcc);
-
-  // receiverAcc, amount & currentAcc checking
+  // receiver account, amount & current account checking
   if (
     amount > 0 &&
     receiverAcc &&
@@ -268,7 +296,6 @@ btnTransfer.addEventListener('click', function (e) {
     currentAccount.balance >= amount
   ) {
     // if success, do transfer
-    console.log('transfer valid!');
     currentAccount.movements.push(-amount);
     receiverAcc.movements.push(amount);
   }
@@ -280,30 +307,45 @@ btnTransfer.addEventListener('click', function (e) {
   // update the UI
   updateUI(currentAccount);
 
+  // clear & set logout timer
+  clearInterval(timer);
+  timer = startLogOutTimer();
+
   // clear input fields
   inputTransferTo.value = inputTransferAmount.value = '';
 });
 
-// REQUEST LOAN
+// Request Loan
 btnLoan.addEventListener('click', function (e) {
   e.preventDefault();
 
   const amount = Math.floor(inputLoanAmount.value);
 
-  if (amount > 0 && currentAccount.movements.some(mov => mov > amount * 0.1)) {
-    currentAccount.movements.push(amount);
-  } else {
-    console.log('requested loan is too big!');
-  }
+  // Delay loan request for 2 seconds
+  setTimeout(() => {
+    if (
+      amount > 0 &&
+      currentAccount.movements.some(mov => mov > amount * 0.1)
+    ) {
+      console.log('request accepted.');
+      currentAccount.movements.push(amount);
+    } else {
+      console.log('requested loan is too big!');
+    }
 
-  // add date
-  currentAccount.movementsDates.push(new Date().toISOString());
+    // add date
+    currentAccount.movementsDates.push(new Date().toISOString());
 
-  // Update the UI
-  updateUI(currentAccount);
+    // update the UI
+    updateUI(currentAccount);
 
-  // clear input field
-  inputLoanAmount.value = '';
+    // clear & set logout timer
+    clearInterval(timer);
+    timer = startLogOutTimer();
+
+    // clear input field
+    inputLoanAmount.value = '';
+  }, 2000);
 });
 
 // CLOSE ACCOUNT
@@ -337,11 +379,11 @@ btnSort.addEventListener('click', function (e) {
   sorted = !sorted;
 });
 
-// PRACTICE & EXERCISES FOR ARRAYS
+// ARRAYS
 
 // const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
 
-// Exercise 1
+// EXERCISE 1
 
 // const dogsJulia1 = [3, 5, 2, 12, 7];
 // const dogsKate1 = [4, 1, 15, 8, 3];
@@ -367,7 +409,6 @@ btnSort.addEventListener('click', function (e) {
 // checkDogs(dogsJulia2, dogsKate2);
 
 // const euroToUSD = 1.1;
-
 // const movementsToUSD = account1.movements.map(mov => mov * euroToUSD);
 
 // console.log(account1.movements);
@@ -375,11 +416,10 @@ btnSort.addEventListener('click', function (e) {
 
 // Reduce
 // Calculate maximum value
-
 // const max = movements.reduce((acc, cur) => (acc > cur ? acc : cur));
 // console.log(max);
 
-// Exercise 2
+// EXERCISE 2
 
 // const calcAverageHumanAge = function (ages) {
 //   const humanAges = ages.map(age => (age <= 2 ? 2 * age : 16 + age * 4));
@@ -404,7 +444,7 @@ btnSort.addEventListener('click', function (e) {
 //   .map(mov => mov * euroToUSD)
 //   .reduce((acc, mov) => acc + mov, 0);
 
-// Exercise 3
+// EXERCISE 3
 
 // const calcAverageHumanAge = ages =>
 //   ages
@@ -417,7 +457,6 @@ btnSort.addEventListener('click', function (e) {
 
 // Find
 // const user = accounts.find(acc => acc.owner === 'Jane Doe');
-
 // console.log(user);
 
 // Some & every
@@ -502,7 +541,7 @@ btnSort.addEventListener('click', function (e) {
 // );
 // console.log(diceRolls);
 
-// Arrays practice & challenge
+// ARRAYS PRACTICE & CHALLENGE
 
 // console.log(movements);
 // // #1
@@ -652,7 +691,6 @@ btnSort.addEventListener('click', function (e) {
 // console.log(20n > 18);
 // console.log(20n === 20);
 // console.log(20n == '20');
-
 // console.log(2000n + 20); // not allowed
 
 // Dates
@@ -682,7 +720,6 @@ btnSort.addEventListener('click', function (e) {
 // console.log('Milliseconds passed since 01-01-1970:', future.getTime());
 
 // console.log(new Date(2553516000000));
-
 // console.log(Date.now()); // timestamp 01-01-1970 to current date
 
 // future.setFullYear(2050);
@@ -692,26 +729,42 @@ btnSort.addEventListener('click', function (e) {
 // console.log(+future);
 
 // const calcDaysPassed = (date1, date2) =>
-//   Math.abs(date2 - date1) / (1000 * 60 * 60 * 24);
+// Math.abs(date2 - date1) / (1000 * 60 * 60 * 24);
 
 // const days1 = calcDaysPassed(new Date(2040, 4, 22), new Date(2040, 4, 12));
-
 // console.log('Days:', days1);
 
 // Internationalization
 
 // numbers
-const nums = 34398939.22;
+// const nums = 34398939.22;
 
-const options = {
-  style: 'currency',
-  currency: 'PHP',
-};
+// const options = {
+//   style: 'currency',
+//   currency: 'PHP',
+// };
 
-console.log('US:', new Intl.NumberFormat('en-US').format(nums));
-console.log('Chinese SG:', new Intl.NumberFormat('zh-SG').format(nums));
-console.log('Syria', new Intl.NumberFormat('ar-SY').format(nums));
-console.log(
-  'Philippines:',
-  new Intl.NumberFormat('tg-PH', options).format(nums)
-);
+// console.log('US:', new Intl.NumberFormat('en-US').format(nums));
+// console.log('Chinese SG:', new Intl.NumberFormat('zh-SG').format(nums));
+// console.log('Syria', new Intl.NumberFormat('ar-SY').format(nums));
+// console.log(
+//   'Philippines:',
+//   new Intl.NumberFormat('tg-PH', options).format(nums)
+// );
+
+// setTimeout
+// const ingredients = ['mushroom', 'bacon'];
+
+// const pizza = setTimeout(
+//   (ing1, ing2) => console.log(`Here is your order ${ing1} and ${ing2} pizza🍕`),
+//   3000,
+//   ...ingredients
+// );
+// if (ingredients.includes('pineapple')) clearTimeout(pizza); // clear timeout if condition is met
+// console.log('Waiting...');
+
+// setInterval
+// setInterval(() => {
+//   const now = new Date();
+//   console.log(now);
+// }, 1000);
