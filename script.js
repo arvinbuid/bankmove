@@ -37,7 +37,7 @@ const account2 = {
     '2024-09-03T18:49:59.371Z',
     '2024-09-05T12:01:20.894Z',
   ],
-  currency: 'USD',
+  currency: 'PHP',
   locale: 'tl-PH',
 };
 
@@ -89,6 +89,14 @@ const formatMovementDate = function (date, locale) {
   return new Intl.DateTimeFormat(locale).format(date);
 };
 
+// REUSABLE INTERNATIONALIZATION FOR CURRENCY
+const formatCurrency = function (value, locale, currency) {
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency,
+  }).format(value);
+};
+
 // Display deposit & withdrawals
 const displayMovements = function (acc, sort = false) {
   containerMovements.innerHTML = '';
@@ -102,9 +110,16 @@ const displayMovements = function (acc, sort = false) {
   movsSort.map((mov, i) => {
     const type = mov > 0 ? 'deposit' : 'withdrawal';
 
-    // display date
+    // internationalization date
     const date = new Date(acc.movementsDates[i]);
     const displayDate = formatMovementDate(date, acc.locale);
+
+    // internationalization currency
+    const displayMovementCurrency = formatCurrency(
+      mov,
+      acc.locale,
+      acc.currency
+    );
 
     const html = `
      <div class="movements__row">
@@ -112,7 +127,7 @@ const displayMovements = function (acc, sort = false) {
       i + 1
     } ${type}</div>
        <div class="movements__date">${displayDate}</div>
-       <div class="movements__value">${mov.toFixed(2)}</div>
+       <div class="movements__value">${displayMovementCurrency}</div>
      </div>
    `;
 
@@ -123,28 +138,40 @@ const displayMovements = function (acc, sort = false) {
 // Display total balance
 const calculateDisplayBalance = function (acc) {
   acc.balance = acc.movements.reduce((acc, cur) => acc + cur);
-  labelBalance.textContent = `${acc.balance} €`;
+  const currency = formatCurrency(acc.balance, acc.locale, acc.currency);
+  labelBalance.textContent = currency;
 };
 
 // Display summary of deposit, withdraw & interest
 const calculateDisplaySummary = function (acc) {
+  // income
   const income = acc.movements
     .filter(mov => mov > 0)
     .reduce((acc, mov) => acc + mov, 0);
-  labelSumIn.textContent = `${income.toFixed(2)}€`;
 
+  const incomeCurrency = formatCurrency(income, acc.locale, acc.currency);
+
+  labelSumIn.textContent = incomeCurrency;
+
+  // out
   const out = acc.movements
     .filter(mov => mov < 0)
     .reduce((acc, mov) => acc + mov, 0);
-  labelSumOut.textContent = `${Math.abs(out.toFixed(2))}€`;
 
+  const outCurrency = formatCurrency(out, acc.locale, acc.currency);
+
+  labelSumOut.textContent = outCurrency;
+
+  // interest
   const interest = acc.movements
     .filter(mov => mov > 0)
     .map(deposit => (deposit * acc.interestRate) / 100)
-
     .filter(interest => interest > 1)
     .reduce((acc, interest) => acc + interest, 0);
-  labelSumInterest.textContent = `${interest.toFixed(2)}€`;
+
+  const interestCurrency = formatCurrency(interest, acc.locale, acc.currency);
+
+  labelSumInterest.textContent = interestCurrency;
 };
 
 // Format username
@@ -672,3 +699,19 @@ btnSort.addEventListener('click', function (e) {
 // console.log('Days:', days1);
 
 // Internationalization
+
+// numbers
+const nums = 34398939.22;
+
+const options = {
+  style: 'currency',
+  currency: 'PHP',
+};
+
+console.log('US:', new Intl.NumberFormat('en-US').format(nums));
+console.log('Chinese SG:', new Intl.NumberFormat('zh-SG').format(nums));
+console.log('Syria', new Intl.NumberFormat('ar-SY').format(nums));
+console.log(
+  'Philippines:',
+  new Intl.NumberFormat('tg-PH', options).format(nums)
+);
