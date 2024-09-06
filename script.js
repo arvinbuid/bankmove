@@ -17,8 +17,8 @@ const account1 = {
     '2024-09-03T23:36:17.929Z',
     '2024-09-05T10:51:36.790Z',
   ],
-  currency: 'EUR',
-  locale: 'pt-PT', // de-DE
+  currency: 'USD',
+  locale: 'en-US', // de-DE
 };
 
 const account2 = {
@@ -33,12 +33,12 @@ const account2 = {
     '2023-12-25T06:04:23.907Z',
     '2024-01-25T14:18:46.235Z',
     '2024-02-05T16:33:06.386Z',
-    '2024-04-10T14:43:26.374Z',
-    '2024-06-25T18:49:59.371Z',
-    '2024-07-26T12:01:20.894Z',
+    '2024-09-01T14:43:26.374Z',
+    '2024-09-03T18:49:59.371Z',
+    '2024-09-05T12:01:20.894Z',
   ],
   currency: 'USD',
-  locale: 'en-US',
+  locale: 'tl-PH',
 };
 
 const accounts = [account1, account2];
@@ -71,7 +71,7 @@ const inputClosePin = document.querySelector('.form__input--pin');
 
 // FUNCTIONS
 
-const formatMovementDate = function (date) {
+const formatMovementDate = function (date, locale) {
   const calcDaysPassed = (date1, date2) =>
     Math.round(Math.abs(date2 - date1) / (1000 * 60 * 60 * 24));
 
@@ -81,11 +81,12 @@ const formatMovementDate = function (date) {
   if (daysPassed === 1) return 'Yesterday';
   if (daysPassed <= 7) return `${daysPassed} days ago `;
 
-  const day = `${date.getDate()}`.padStart(2, 0);
-  const month = `${date.getMonth() + 1}`.padStart(2, 0);
-  const year = date.getFullYear();
+  // const day = `${date.getDate()}`.padStart(2, 0);
+  // const month = `${date.getMonth() + 1}`.padStart(2, 0);
+  // const year = date.getFullYear();
 
-  return `${year}/${month}/${day}`;
+  // return `${year}/${month}/${day}`;
+  return new Intl.DateTimeFormat(locale).format(date);
 };
 
 // Display deposit & withdrawals
@@ -103,7 +104,7 @@ const displayMovements = function (acc, sort = false) {
 
     // display date
     const date = new Date(acc.movementsDates[i]);
-    const displayDate = formatMovementDate(date);
+    const displayDate = formatMovementDate(date, acc.locale);
 
     const html = `
      <div class="movements__row">
@@ -177,17 +178,6 @@ currentAccount = account1;
 updateUI(currentAccount);
 containerApp.style.opacity = 100;
 
-// DISPLAY CURRENT DATE - yyyy-mm-dd
-const now = new Date();
-
-const year = now.getFullYear();
-const month = `${now.getMonth() + 1}`.padStart(2, 0);
-const date = `${now.getDate()}`.padStart(2, 0);
-const hour = now.getHours();
-const minutes = `${now.getMinutes()}`.padStart(2, 0);
-
-labelDate.textContent = `${year}/${month}/${date}, ${hour}:${minutes}`;
-
 // LOGIN
 btnLogin.addEventListener('click', function (e) {
   e.preventDefault();
@@ -208,16 +198,21 @@ btnLogin.addEventListener('click', function (e) {
     // update the UI
     updateUI(currentAccount);
 
-    // create current date
+    // create current date - internationalization
     const now = new Date();
+    let options = {
+      hour: 'numeric',
+      minute: 'numeric',
+      day: 'numeric',
+      month: 'numeric',
+      year: 'numeric',
+    };
 
-    const year = now.getFullYear();
-    const month = `${now.getMonth() + 1}`.padStart(2, 0);
-    const date = `${now.getDate()}`.padStart(2, 0);
-    const hour = now.getHours();
-    const minutes = `${now.getMinutes()}`.padStart(2, 0);
+    const locale = navigator.language;
 
-    labelDate.textContent = `${year}/${month}/${date}, ${hour}:${minutes}`;
+    labelDate.textContent = new Intl.DateTimeFormat(locale, options).format(
+      now
+    );
 
     // clear input fields
     inputLoginUsername.value = inputLoginPin.value = '';
@@ -675,3 +670,5 @@ btnSort.addEventListener('click', function (e) {
 // const days1 = calcDaysPassed(new Date(2040, 4, 22), new Date(2040, 4, 12));
 
 // console.log('Days:', days1);
+
+// Internationalization
